@@ -408,6 +408,9 @@ bool ConfigManager::load() {
 	loadIntConfig(L, GUILD_WARS_MINIMUM_FRAGS, "guildWarsMinimunFrags", 10);
 	loadIntConfig(L, GUILD_WARS_DEFAULT_FRAGS, "guildWarsDefaultFrags", 100);
 	loadIntConfig(L, LEVEL_TO_FORM_GUILD, "levelToFormGuild", 8);
+	loadIntConfig(L, PLAYER_MIN_SPEED, "playerMinSpeed", 120);
+	loadIntConfig(L, PLAYER_MAX_SPEED, "playerMaxSpeed", 1500);
+	loadIntConfig(L, GOD_MAX_SPEED, "godMaxSpeed", 5000);
 
 	loadStringConfig(L, CORE_DIRECTORY, "coreDirectory", "data");
 	loadStringConfig(L, DATA_DIRECTORY, "dataPackDirectory", "data-global");

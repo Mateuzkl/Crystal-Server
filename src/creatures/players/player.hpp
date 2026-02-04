@@ -222,8 +222,6 @@ struct EquippedWeaponProficiencyBonuses {
 
 using MuteCountMap = std::map<uint32_t, uint32_t>;
 
-static constexpr int32_t PLAYER_MAX_SPEED = 1500;
-static constexpr uint16_t PLAYER_MIN_SPEED = 10;
 static constexpr uint8_t PLAYER_SOUND_HEALTH_CHANGE = 10;
 static constexpr int32_t NOTIFY_DEPOT_BOX_RANGE = 1;
 
@@ -1847,9 +1845,7 @@ private:
 	int32_t marriageSpouse = -1;
 
 	void updateItemsLight(bool internal = false);
-	uint16_t getStepSpeed() const override {
-		return std::max<uint16_t>(PLAYER_MIN_SPEED, std::min<uint16_t>(PLAYER_MAX_SPEED, getSpeed()));
-	}
+	uint16_t getStepSpeed() const override;
 	void updateBaseSpeed();
 
 	bool isPromoted() const;

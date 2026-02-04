@@ -447,8 +447,10 @@ void Creature::onCreatureMove(const std::shared_ptr<Creature> &creature, const s
 
 		if (!teleport) {
 			if (oldPos.z != newPos.z) {
+				// floor change extra cost
 				lastStepCost = WALK_FLOOR_CHANGE_EXTRA_COST;
 			} else if (Position::getDistanceX(newPos, oldPos) >= 1 && Position::getDistanceY(newPos, oldPos) >= 1) {
+				// diagonal extra cost
 				lastStepCost = WALK_DIAGONAL_EXTRA_COST;
 			}
 		} else {
@@ -1456,11 +1458,40 @@ uint16_t Creature::getStepDuration(Direction dir) {
 		return 0;
 	}
 
-	if (walk.needRecache()) {
-		walk.duration = (1000 * walk.groundSpeed) / walk.calculatedStepSpeed;
+	const int32_t stepSpeed = getStepSpeed();
+	if (stepSpeed <= 0) {
+		return 0;
 	}
 
-	return walk.duration * lastStepCost;
+	uint32_t groundSpeed = 150;
+	if (const auto& tile = getTile()) {
+		if (const auto& ground = tile->getGround()) {
+			groundSpeed = Item::items[ground->getID()].speed;
+			if (groundSpeed == 0) {
+				groundSpeed = 150;
+			}
+		}
+	}
+
+	int64_t stepDuration = (1000 * static_cast<int64_t>(groundSpeed)) / stepSpeed;
+
+	if (stepDuration < SCHEDULER_MINTICKS) {
+		stepDuration = SCHEDULER_MINTICKS;
+	}
+
+	// Diagonal movement
+	if ((dir & DIRECTION_DIAGONAL_MASK) != 0) {
+		stepDuration *= WALK_DIAGONAL_EXTRA_COST;
+	}
+
+	// Monster nearby slowdown
+	if (const auto& monster = getMonster()) {
+		if (monster->isTargetNearby() && !monster->isFleeing() && !monster->getMaster()) {
+			stepDuration *= 3;
+		}
+	}
+
+	return static_cast<uint16_t>(stepDuration);
 }
 
 int64_t Creature::getEventStepTicks(bool onlyDelay) {
@@ -1469,11 +1500,11 @@ int64_t Creature::getEventStepTicks(bool onlyDelay) {
 		return ret;
 	}
 
-	if (!onlyDelay) {
-		return getStepDuration();
+	if (onlyDelay) {
+		return 1;
 	}
 
-	return 1;
+	return getStepDuration();
 }
 
 LightInfo Creature::getCreatureLight() const {
@@ -1481,12 +1512,13 @@ LightInfo Creature::getCreatureLight() const {
 }
 
 uint16_t Creature::getSpeed() const {
-	return std::clamp(baseSpeed + varSpeed, 0, static_cast<int>(PLAYER_MAX_SPEED));
+	return std::clamp(baseSpeed + varSpeed, 0, g_configManager().getNumber(PLAYER_MAX_SPEED));
 }
 
 void Creature::setSpeed(int32_t varSpeedDelta) {
 	// Prevents creatures from not exceeding the maximum allowed speed
-	if (getSpeed() >= PLAYER_MAX_SPEED) {
+	const int32_t maxSpeed = g_configManager().getNumber(PLAYER_MAX_SPEED);
+	if (getSpeed() >= maxSpeed) {
 		return;
 	}
 

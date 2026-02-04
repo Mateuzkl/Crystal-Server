@@ -134,6 +134,16 @@ uint16_t Player::getVocationId() const {
 	return vocation->getId();
 }
 
+uint16_t Player::getStepSpeed() const {
+	if (group && group->access) {
+		return static_cast<uint16_t>(g_configManager().getNumber(GOD_MAX_SPEED));
+	}
+
+	const int32_t minSpeed = g_configManager().getNumber(PLAYER_MIN_SPEED);
+	const int32_t maxSpeed = g_configManager().getNumber(PLAYER_MAX_SPEED);
+	return static_cast<uint16_t>(std::max<int32_t>(minSpeed, std::min<int32_t>(maxSpeed, getSpeed())));
+}
+
 bool Player::isPushable() {
 	if (hasFlag(PlayerFlags_t::CannotBePushed)) {
 		return false;

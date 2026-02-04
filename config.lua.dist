@@ -83,6 +83,14 @@ guildWarsMinimunFrags = 10
 levelToFormGuild = 8
 createGuildOnlyPremium = true
 
+-- Speed limits
+-- NOTE: playerMinSpeed: Minimum speed for players (default: 120)
+-- NOTE: playerMaxSpeed: Maximum speed for normal players (default: 1500)
+-- NOTE: godMaxSpeed: Maximum speed for gods/gms (default: 5000)
+playerMinSpeed = 120
+playerMaxSpeed = 1500
+godMaxSpeed = 5000
+
 -- Clean system
 cleanProtectionZones = false
 
