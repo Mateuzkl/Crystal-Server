@@ -322,7 +322,7 @@ void Creature::addEventWalk(bool firstStep) {
 		}
 
 		eventWalk = g_dispatcher().scheduleEvent(
-			static_cast<uint32_t>(ticks),
+			std::max<int64_t>(SCHEDULER_MINTICKS, ticks),
 			[creatureId = getID()] { g_game().checkCreatureWalk(creatureId); }, "Game::checkCreatureWalk"
 		);
 	});
@@ -1457,30 +1457,23 @@ uint16_t Creature::getStepDuration(Direction dir) {
 	}
 
 	if (walk.needRecache()) {
-		auto duration = std::floor(1000 * walk.groundSpeed / walk.calculatedStepSpeed);
-		walk.duration = static_cast<uint16_t>(std::ceil(duration / SERVER_BEAT) * SERVER_BEAT);
+		walk.duration = (1000 * walk.groundSpeed) / walk.calculatedStepSpeed;
 	}
 
-	auto duration = walk.duration;
-	if ((dir & DIRECTION_DIAGONAL_MASK) != 0) {
-		duration *= WALK_DIAGONAL_EXTRA_COST;
-	} else if (const auto &monster = getMonster()) {
-		if (monster->isTargetNearby() && !monster->isFleeing() && !monster->getMaster()) {
-			duration *= WALK_TARGET_NEARBY_EXTRA_COST;
-		}
-	}
-
-	return duration;
+	return walk.duration * lastStepCost;
 }
 
 int64_t Creature::getEventStepTicks(bool onlyDelay) {
 	int64_t ret = getWalkDelay();
-	if (ret <= 0) {
-		const uint16_t stepDuration = getStepDuration();
-		ret = onlyDelay && stepDuration > 0 ? 1 : stepDuration * lastStepCost;
+	if (ret > 0) {
+		return ret;
 	}
 
-	return ret;
+	if (!onlyDelay) {
+		return getStepDuration();
+	}
+
+	return 1;
 }
 
 LightInfo Creature::getCreatureLight() const {
@@ -1488,7 +1481,7 @@ LightInfo Creature::getCreatureLight() const {
 }
 
 uint16_t Creature::getSpeed() const {
-	return std::clamp(baseSpeed + varSpeed, 0, static_cast<int>(std::numeric_limits<uint16_t>::max()));
+	return std::clamp(baseSpeed + varSpeed, 0, static_cast<int>(PLAYER_MAX_SPEED));
 }
 
 void Creature::setSpeed(int32_t varSpeedDelta) {
