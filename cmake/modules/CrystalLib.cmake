@@ -74,7 +74,7 @@ target_link_libraries(${PROJECT_NAME}_lib
         ${LUAJIT_LIBRARIES}
         CURL::libcurl
         ZLIB::ZLIB
-        absl::any absl::log absl::base absl::bits
+        absl::any absl::log absl::base absl::bits absl::stacktrace absl::symbolize absl::int128
         asio::asio
         eventpp::eventpp
         fmt::fmt

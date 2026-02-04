@@ -9,6 +9,10 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 set(Boost_NO_WARN_NEW_VERSIONS ON)
+# mio (header-only)
+find_path(MIO_INCLUDE_DIR mio/mmap.hpp PATHS /usr/local/include/mio/include REQUIRED)
+include_directories(${MIO_INCLUDE_DIR})
+
 
 # Make will print more details
 set(CMAKE_VERBOSE_MAKEFILE OFF)
@@ -16,7 +20,7 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 # *****************************************************************************
 # Packages / Libs
 # *****************************************************************************
-find_package(CURL CONFIG REQUIRED)
+find_package(CURL REQUIRED)
 find_package(GMP REQUIRED)
 find_package(LuaJIT REQUIRED)
 find_package(MySQL REQUIRED)
@@ -24,20 +28,33 @@ find_package(Protobuf REQUIRED)
 find_package(Threads REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(absl CONFIG REQUIRED)
-find_package(asio CONFIG REQUIRED)
-find_package(eventpp CONFIG REQUIRED)
-find_package(magic_enum CONFIG REQUIRED)
+find_path(ASIO_INCLUDE_DIR asio.hpp REQUIRED)
+find_path(EVENTPP_INCLUDE_DIR eventpp REQUIRED)
+find_path(MAGIC_ENUM_INCLUDE_DIR magic_enum/magic_enum.hpp PATH_SUFFIXES include magic_enum/include REQUIRED)
+include_directories(${MAGIC_ENUM_INCLUDE_DIR})
 find_package(Boost REQUIRED COMPONENTS locale)
+# mio (header-only)
+find_path(MIO_INCLUDE_DIR mio/mmap.hpp PATHS /usr/local/include/mio/include REQUIRED)
+include_directories(${MIO_INCLUDE_DIR})
+
 if(FEATURE_METRICS)
     find_package(opentelemetry-cpp CONFIG REQUIRED)
     find_package(prometheus-cpp CONFIG REQUIRED)
 endif()
-find_package(mio REQUIRED)
+# find_package(mio REQUIRED)
 find_package(pugixml CONFIG REQUIRED)
 find_package(spdlog REQUIRED)
+find_package(fmt CONFIG REQUIRED)
+add_definitions(-DFMT_HEADER_ONLY)
 find_package(nlohmann_json CONFIG REQUIRED)
-find_package(unofficial-argon2 CONFIG REQUIRED)
-find_package(unofficial-libmariadb CONFIG REQUIRED)
+# argon2 (system)
+find_path(ARGON2_INCLUDE_DIR argon2.h REQUIRED)
+find_library(ARGON2_LIBRARY argon2 REQUIRED)
+include_directories(${ARGON2_INCLUDE_DIR})
+link_libraries(${ARGON2_LIBRARY})
+
+# find_package(unofficial-argon2 CONFIG REQUIRED)
+# find_package(unofficial-libmariadb CONFIG REQUIRED)
 
 find_path(BOOST_DI_INCLUDE_DIRS "boost/di.hpp")
 
@@ -223,3 +240,45 @@ function(setup_target TARGET_NAME)
     endif()
     target_link_libraries(${TARGET_NAME} PUBLIC project_options)
 endfunction()
+
+# =========================
+# Linux fallback targets
+# =========================
+
+# ASIO (header-only)
+add_library(asio INTERFACE)
+target_include_directories(asio INTERFACE /usr/include)
+add_library(asio::asio ALIAS asio)
+
+# EventPP (header-only)
+add_library(eventpp INTERFACE)
+target_include_directories(eventpp INTERFACE /usr/include)
+add_library(eventpp::eventpp ALIAS eventpp)
+
+# magic_enum (header-only)
+add_library(magic_enum INTERFACE)
+target_include_directories(magic_enum INTERFACE /usr/include)
+add_library(magic_enum::magic_enum ALIAS magic_enum)
+
+# mio (header-only)
+add_library(mio INTERFACE)
+target_include_directories(mio INTERFACE /usr/include)
+add_library(mio::mio ALIAS mio)
+
+# Argon2 (system)
+add_library(argon2 UNKNOWN IMPORTED)
+set_target_properties(argon2 PROPERTIES
+    IMPORTED_LOCATION /usr/lib/x86_64-linux-gnu/libargon2.so
+)
+add_library(unofficial::argon2::libargon2 ALIAS argon2)
+
+# MariaDB / MySQL
+add_library(mariadb UNKNOWN IMPORTED)
+set_target_properties(mariadb PROPERTIES
+    IMPORTED_LOCATION /usr/lib/x86_64-linux-gnu/libmysqlclient.so
+)
+add_library(unofficial::libmariadb ALIAS mariadb)
+
+# Abseil log (fake target, headers only used)
+add_library(absl_log INTERFACE)
+add_library(absl::log ALIAS absl_log)
