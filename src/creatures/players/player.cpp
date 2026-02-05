@@ -10124,7 +10124,7 @@ bool Player::saySpell(SpeakClasses type, const std::string &text, bool isGhostMo
 				if (emoteSpellsEnabled) {
 					tmpPlayer->sendCreatureSay(static_self_cast<Player>(), TALKTYPE_MONSTER_SAY, text, pos);
 				} else {
-					tmpPlayer->sendCreatureSay(static_self_cast<Player>(), TALKTYPE_SPELL_USE, text, pos);
+					tmpPlayer->sendCreatureSay(static_self_cast<Player>(), TALKTYPE_SAY, text, pos);
 				}
 			}
 		}
