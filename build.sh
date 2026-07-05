@@ -50,10 +50,10 @@ Opcoes:
   --clean          Limpa a pasta de build atual antes de configurar
   --debug          Usa CMAKE_BUILD_TYPE=Debug
   --release        Usa CMAKE_BUILD_TYPE=Release
-  --asan           Build Debug com AddressSanitizer
-  --valgrind       Build RelWithDebInfo amigavel para Valgrind
+  --asan           Compila Debug com AddressSanitizer
+  --valgrind       Compila RelWithDebInfo amigavel para Valgrind
   --run            Roda o servidor apos compilar
-  --no-run         So compila; nao abre ASan/Valgrind automaticamente
+  --no-run         So compila, mesmo quando usado junto com --run
   --jobs N         Numero de jobs paralelos
   --skip-deps      Pula instalacao/verificacao de dependencias
   --force-os       Permite rodar fora do Ubuntu 24.04
@@ -68,8 +68,10 @@ Variaveis:
 Exemplos:
   ./build.sh
   ./build.sh --valgrind
+  ./run-valgrind.sh
   ./build.sh --asan
-  ./build.sh --valgrind --no-run
+  ./run-asan.sh
+  ./build.sh --valgrind --run
 EOF
 }
 
@@ -95,7 +97,6 @@ parse_args() {
         ;;
       --asan|asan|--run-asan|run-asan)
         ASAN_BUILD=1
-        RUN_AFTER_BUILD=1
         BUILD_TYPE="Debug"
         if [[ -z "${CRYSTAL_BUILD_DIR:-}" ]]; then
           BUILD_DIR="build-asan-linux"
@@ -104,7 +105,6 @@ parse_args() {
         ;;
       --valgrind|valgrind|--run-valgrind|run-valgrind|--valriqd|valriqd|--run-valriqd|run-valriqd)
         VALGRIND_BUILD=1
-        RUN_AFTER_BUILD=1
         BUILD_TYPE="RelWithDebInfo"
         if [[ -z "${CRYSTAL_BUILD_DIR:-}" ]]; then
           BUILD_DIR="build-valgrind-linux"

@@ -68,9 +68,10 @@ The script installs the required packages, prepares header-only dependencies in 
 | Clean normal build | `./build.sh --clean` |
 | Release build | `./build.sh --release` |
 | Debug build | `./build.sh --debug` |
-| Build and run with ASan | `./build.sh --asan` |
-| Build and run with Valgrind | `./build.sh --valgrind` |
-| Diagnostic build only | `./build.sh --valgrind --no-run` |
+| Build ASan | `./build.sh --asan` |
+| Build Valgrind | `./build.sh --valgrind` |
+| Build and run ASan | `./build.sh --asan --run` |
+| Build and run Valgrind | `./build.sh --valgrind --run` |
 | Use custom jobs | `./build.sh --jobs 4` |
 | Skip dependency install | `./build.sh --skip-deps` |
 | Try outside Ubuntu 24.04 | `./build.sh --force-os` |
@@ -81,16 +82,16 @@ The script installs the required packages, prepares header-only dependencies in 
 
 Use AddressSanitizer when you are hunting crashes, use-after-free bugs, invalid memory access or leaks.
 
-Build and run automatically:
+Build:
 
 ```bash
 ./build.sh --asan
 ```
 
-Only build:
+Build and run in one command:
 
 ```bash
-./build.sh --asan --no-run
+./build.sh --asan --run
 ```
 
 Run an existing ASan build:
@@ -111,16 +112,16 @@ ASAN_OPTIONS=detect_leaks=1:halt_on_error=1:abort_on_error=1:symbolize=1
 
 Use Valgrind when you need a slower but very detailed memory report.
 
-Build and run automatically:
+Build:
 
 ```bash
 ./build.sh --valgrind
 ```
 
-Only build:
+Build and run in one command:
 
 ```bash
-./build.sh --valgrind --no-run
+./build.sh --valgrind --run
 ```
 
 Run an existing Valgrind build:
