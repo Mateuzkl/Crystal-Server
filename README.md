@@ -37,7 +37,7 @@ It is based on [The Forgotten Server](https://github.com/otland/forgottenserver)
 | Core | C++23, CMake, LuaJIT, MySQL/MariaDB and modern Crystal systems |
 | Protocol | Client protocol 15.25, with old protocol support controlled by config |
 | Build | Native Ubuntu/WSL build through one simple `build.sh` command |
-| Diagnostics | Easy AddressSanitizer and Valgrind builds for memory fixes |
+| Diagnostics | AddressSanitizer and Valgrind builds that can run automatically |
 | Tools | Compatible with the Crystal game client, Mehah OTClient and RME Crystal |
 
 ---
@@ -64,9 +64,13 @@ The script installs the required packages, prepares header-only dependencies in 
 | Goal | Command |
 |---|---|
 | Normal build | `./build.sh` |
+| Build and run | `./build.sh --run` |
 | Clean normal build | `./build.sh --clean` |
 | Release build | `./build.sh --release` |
 | Debug build | `./build.sh --debug` |
+| Build and run with ASan | `./build.sh --asan` |
+| Build and run with Valgrind | `./build.sh --valgrind` |
+| Diagnostic build only | `./build.sh --valgrind --no-run` |
 | Use custom jobs | `./build.sh --jobs 4` |
 | Skip dependency install | `./build.sh --skip-deps` |
 | Try outside Ubuntu 24.04 | `./build.sh --force-os` |
@@ -75,14 +79,27 @@ The script installs the required packages, prepares header-only dependencies in 
 
 ## ASan
 
-Use AddressSanitizer when you are hunting crashes, use-after-free bugs, invalid memory access or leaks:
+Use AddressSanitizer when you are hunting crashes, use-after-free bugs, invalid memory access or leaks.
+
+Build and run automatically:
 
 ```bash
 ./build.sh --asan
+```
+
+Only build:
+
+```bash
+./build.sh --asan --no-run
+```
+
+Run an existing ASan build:
+
+```bash
 ./run-asan.sh
 ```
 
-The ASan build uses `build-asan-linux` and runs with strict defaults:
+If the ASan binary is missing, `run-asan.sh` builds it first. The ASan build uses `build-asan-linux` and runs with strict defaults:
 
 ```bash
 ASAN_OPTIONS=detect_leaks=1:halt_on_error=1:abort_on_error=1:symbolize=1
@@ -92,14 +109,27 @@ ASAN_OPTIONS=detect_leaks=1:halt_on_error=1:abort_on_error=1:symbolize=1
 
 ## Valgrind
 
-Use Valgrind when you need a slower but very detailed memory report:
+Use Valgrind when you need a slower but very detailed memory report.
+
+Build and run automatically:
 
 ```bash
 ./build.sh --valgrind
+```
+
+Only build:
+
+```bash
+./build.sh --valgrind --no-run
+```
+
+Run an existing Valgrind build:
+
+```bash
 ./run-valgrind.sh
 ```
 
-The Valgrind build uses `build-valgrind-linux` and writes the report to:
+If the Valgrind binary is missing, `run-valgrind.sh` builds it first. The Valgrind build uses `build-valgrind-linux` and writes the report to:
 
 ```bash
 valgrind.log

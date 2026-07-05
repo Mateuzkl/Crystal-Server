@@ -12,6 +12,9 @@ SKIP_DEPS=0
 FORCE_OS=0
 ASAN_BUILD=0
 VALGRIND_BUILD=0
+RUN_AFTER_BUILD=0
+NO_RUN_AFTER_BUILD=0
+SERVER_ARGS=()
 
 if [[ -t 1 ]]; then
   BOLD=$'\033[1m'
@@ -49,21 +52,35 @@ Opcoes:
   --release        Usa CMAKE_BUILD_TYPE=Release
   --asan           Build Debug com AddressSanitizer
   --valgrind       Build RelWithDebInfo amigavel para Valgrind
+  --run            Roda o servidor apos compilar
+  --no-run         So compila; nao abre ASan/Valgrind automaticamente
   --jobs N         Numero de jobs paralelos
   --skip-deps      Pula instalacao/verificacao de dependencias
   --force-os       Permite rodar fora do Ubuntu 24.04
   -h, --help       Mostra esta ajuda
+  --               Passa os argumentos seguintes para o servidor
 
 Variaveis:
   CRYSTAL_DEPS_PREFIX   Prefixo dos headers manuais (padrao: $HOME/.local)
   CRYSTAL_BUILD_DIR     Pasta de build (padrao: build-native)
   JOBS                  Jobs paralelos
+
+Exemplos:
+  ./build.sh
+  ./build.sh --valgrind
+  ./build.sh --asan
+  ./build.sh --valgrind --no-run
 EOF
 }
 
 parse_args() {
   while (($#)); do
     case "$1" in
+      --)
+        shift
+        SERVER_ARGS=("$@")
+        break
+        ;;
       --clean)
         CLEAN_BUILD=1
         shift
@@ -76,20 +93,30 @@ parse_args() {
         BUILD_TYPE="Release"
         shift
         ;;
-      --asan)
+      --asan|asan|--run-asan|run-asan)
         ASAN_BUILD=1
+        RUN_AFTER_BUILD=1
         BUILD_TYPE="Debug"
         if [[ -z "${CRYSTAL_BUILD_DIR:-}" ]]; then
           BUILD_DIR="build-asan-linux"
         fi
         shift
         ;;
-      --valgrind)
+      --valgrind|valgrind|--run-valgrind|run-valgrind|--valriqd|valriqd|--run-valriqd|run-valriqd)
         VALGRIND_BUILD=1
+        RUN_AFTER_BUILD=1
         BUILD_TYPE="RelWithDebInfo"
         if [[ -z "${CRYSTAL_BUILD_DIR:-}" ]]; then
           BUILD_DIR="build-valgrind-linux"
         fi
+        shift
+        ;;
+      --run|run)
+        RUN_AFTER_BUILD=1
+        shift
+        ;;
+      --no-run|--build-only|build-only)
+        NO_RUN_AFTER_BUILD=1
         shift
         ;;
       --jobs)
@@ -117,6 +144,10 @@ parse_args() {
 
   if [[ "${ASAN_BUILD}" -eq 1 && "${VALGRIND_BUILD}" -eq 1 ]]; then
     die "Use --asan ou --valgrind, nao os dois juntos."
+  fi
+
+  if [[ "${NO_RUN_AFTER_BUILD}" -eq 1 ]]; then
+    RUN_AFTER_BUILD=0
   fi
 }
 
@@ -402,6 +433,32 @@ copy_binary() {
   fi
 }
 
+finish_or_run() {
+  if [[ "${RUN_AFTER_BUILD}" -eq 1 ]]; then
+    if [[ "${VALGRIND_BUILD}" -eq 1 ]]; then
+      ok "Build Valgrind pronto. Abrindo com Valgrind agora."
+      info "Log: ${CRYSTAL_VALGRIND_LOG:-${SCRIPT_DIR}/valgrind.log}"
+      exec bash "${SCRIPT_DIR}/run-valgrind.sh" "${SERVER_ARGS[@]}"
+    fi
+
+    if [[ "${ASAN_BUILD}" -eq 1 ]]; then
+      ok "Build ASan pronto. Abrindo com AddressSanitizer agora."
+      exec bash "${SCRIPT_DIR}/run-asan.sh" "${SERVER_ARGS[@]}"
+    fi
+
+    ok "Build pronto. Abrindo Crystal Server agora."
+    exec "${SCRIPT_DIR}/crystalserver" "${SERVER_ARGS[@]}"
+  fi
+
+  if [[ "${VALGRIND_BUILD}" -eq 1 ]]; then
+    printf '\n%bTudo pronto.%b Rode: %s\n' "${GREEN}" "${RESET}" "${SCRIPT_DIR}/run-valgrind.sh"
+  elif [[ "${ASAN_BUILD}" -eq 1 ]]; then
+    printf '\n%bTudo pronto.%b Rode: %s\n' "${GREEN}" "${RESET}" "${SCRIPT_DIR}/run-asan.sh"
+  else
+    printf '\n%bTudo pronto.%b Rode: %s\n' "${GREEN}" "${RESET}" "${SCRIPT_DIR}/crystalserver"
+  fi
+}
+
 main() {
   parse_args "$@"
   init_jobs
@@ -428,8 +485,7 @@ main() {
   configure_build
   build_project
   copy_binary
-
-  printf '\n%bTudo pronto.%b Rode: %s\n' "${GREEN}" "${RESET}" "${SCRIPT_DIR}/crystalserver"
+  finish_or_run
 }
 
 main "$@"
