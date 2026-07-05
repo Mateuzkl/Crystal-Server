@@ -387,6 +387,11 @@ sftp-config.json
 crystalserver
 crystalserver.old
 
+# Native Linux build folders
+/build-native/
+/build-asan-linux/
+/build-valgrind-linux/
+
 # VCPKG
 vcpkg_installed
 

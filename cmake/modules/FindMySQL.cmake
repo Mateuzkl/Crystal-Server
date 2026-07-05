@@ -33,7 +33,9 @@ FIND_PATH(MYSQL_INCLUDE_DIR mysql.h
 		$ENV{MYSQL_INCLUDE_DIR}
 		$ENV{MYSQL_DIR}/include
 		/usr/include/mysql
+		/usr/include/mariadb
 		/usr/local/include/mysql
+		/usr/local/include/mariadb
 		/opt/mysql/mysql/include
 		/opt/mysql/mysql/include/mysql
 		/opt/mysql/include
@@ -73,6 +75,11 @@ ELSE (WIN32)
 				 $ENV{MYSQL_DIR}/libmysql/.libs
 				 $ENV{MYSQL_DIR}/lib
 				 $ENV{MYSQL_DIR}/lib/mysql
+				 /usr/lib
+				 /usr/lib/mysql
+				 /usr/lib/mariadb
+				 /usr/lib/x86_64-linux-gnu
+				 /usr/lib/aarch64-linux-gnu
 				 /usr/lib/mysql
 				 /usr/local/lib/mysql
 				 /usr/local/mysql/lib

@@ -19,12 +19,45 @@
 
 #include <atomic_queue/atomic_queue.h>
 
+#include <functional>
+#include <mutex>
+#include <vector>
+
+struct LockfreePoolRegistry {
+	static std::vector<std::function<void()>> &drains() {
+		static std::vector<std::function<void()>> registeredDrains;
+		return registeredDrains;
+	}
+
+	static std::mutex &mutex() {
+		static std::mutex registryMutex;
+		return registryMutex;
+	}
+
+	static void registerDrain(std::function<void()> drain) {
+		std::lock_guard lock(mutex());
+		drains().emplace_back(std::move(drain));
+	}
+
+	static void drainAll() {
+		std::lock_guard lock(mutex());
+		for (const auto &drain : drains()) {
+			drain();
+		}
+	}
+};
+
 template <typename T, size_t CAPACITY>
 struct LockfreeFreeList {
 	using FreeList = atomic_queue::AtomicQueue2<T*, CAPACITY>;
 
 	static FreeList &get() {
 		static FreeList freeList;
+		static const bool registered = [] {
+			LockfreePoolRegistry::registerDrain([] { drain(); });
+			return true;
+		}();
+		(void)registered;
 		return freeList;
 	}
 
@@ -36,6 +69,14 @@ struct LockfreeFreeList {
 				::operator delete(p, static_cast<std::align_val_t>(alignof(T)));
 				break;
 			}
+		}
+	}
+
+	static void drain() {
+		auto &freeList = get();
+		T* p = nullptr;
+		while (freeList.try_pop(p)) {
+			::operator delete(p);
 		}
 	}
 };

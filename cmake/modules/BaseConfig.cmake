@@ -16,30 +16,105 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 # *****************************************************************************
 # Packages / Libs
 # *****************************************************************************
-find_package(CURL CONFIG REQUIRED)
+find_package(CURL REQUIRED)
 find_package(GMP REQUIRED)
 find_package(LuaJIT REQUIRED)
-find_package(MySQL REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(Threads REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(absl CONFIG REQUIRED)
-find_package(asio CONFIG REQUIRED)
-find_package(eventpp CONFIG REQUIRED)
-find_package(magic_enum CONFIG REQUIRED)
+find_package(fmt CONFIG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS locale)
 if(FEATURE_METRICS)
     find_package(opentelemetry-cpp CONFIG REQUIRED)
     find_package(prometheus-cpp CONFIG REQUIRED)
 endif()
-find_package(mio REQUIRED)
-find_package(pugixml CONFIG REQUIRED)
+find_package(asio CONFIG QUIET)
+if(NOT TARGET asio::asio)
+    find_path(ASIO_INCLUDE_DIR NAMES asio.hpp REQUIRED)
+    add_library(asio INTERFACE)
+    target_include_directories(asio INTERFACE ${ASIO_INCLUDE_DIR})
+    add_library(asio::asio ALIAS asio)
+endif()
+
+find_package(eventpp CONFIG QUIET)
+if(NOT TARGET eventpp::eventpp)
+    find_path(EVENTPP_INCLUDE_DIR NAMES eventpp/eventdispatcher.h REQUIRED)
+    add_library(eventpp INTERFACE)
+    target_include_directories(eventpp INTERFACE ${EVENTPP_INCLUDE_DIR})
+    add_library(eventpp::eventpp ALIAS eventpp)
+endif()
+
+find_package(magic_enum CONFIG QUIET)
+find_path(MAGIC_ENUM_COMPAT_INCLUDE_DIR NAMES magic_enum/magic_enum.hpp)
+if(NOT MAGIC_ENUM_COMPAT_INCLUDE_DIR)
+    message(FATAL_ERROR "magic_enum/magic_enum.hpp was not found. Run ./build.sh again so it can install the compatible header layout in $HOME/.local/include.")
+endif()
+if(NOT TARGET magic_enum::magic_enum)
+    add_library(magic_enum INTERFACE)
+    target_include_directories(magic_enum INTERFACE ${MAGIC_ENUM_COMPAT_INCLUDE_DIR})
+    add_library(magic_enum::magic_enum ALIAS magic_enum)
+endif()
+set(MAGIC_ENUM_INCLUDE_DIRS ${MAGIC_ENUM_COMPAT_INCLUDE_DIR})
+
+find_package(mio CONFIG QUIET)
+if(NOT TARGET mio::mio)
+    find_path(MIO_INCLUDE_DIR NAMES mio/mmap.hpp REQUIRED)
+    add_library(mio INTERFACE)
+    target_include_directories(mio INTERFACE ${MIO_INCLUDE_DIR})
+    add_library(mio::mio ALIAS mio)
+endif()
+
+find_package(pugixml CONFIG QUIET)
+if(NOT TARGET pugixml::pugixml)
+    find_package(PugiXML REQUIRED)
+    add_library(pugixml::pugixml UNKNOWN IMPORTED)
+    set_target_properties(pugixml::pugixml PROPERTIES
+            IMPORTED_LOCATION "${PUGIXML_LIBRARIES}"
+            INTERFACE_INCLUDE_DIRECTORIES "${PUGIXML_INCLUDE_DIR}"
+    )
+endif()
+
 find_package(spdlog REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-find_package(unofficial-argon2 CONFIG REQUIRED)
-find_package(unofficial-libmariadb CONFIG REQUIRED)
+find_package(unofficial-argon2 CONFIG QUIET)
+if(NOT TARGET unofficial::argon2::libargon2)
+    find_path(ARGON2_INCLUDE_DIR NAMES argon2.h REQUIRED)
+    find_library(ARGON2_LIBRARY NAMES argon2 REQUIRED)
+    add_library(unofficial::argon2::libargon2 UNKNOWN IMPORTED)
+    set_target_properties(unofficial::argon2::libargon2 PROPERTIES
+            IMPORTED_LOCATION "${ARGON2_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${ARGON2_INCLUDE_DIR}"
+    )
+endif()
 
-find_path(BOOST_DI_INCLUDE_DIRS "boost/di.hpp")
+find_package(unofficial-libmariadb CONFIG QUIET)
+if(NOT TARGET unofficial::libmariadb)
+    find_package(MySQL REQUIRED)
+    add_library(unofficial::libmariadb INTERFACE IMPORTED)
+    set_target_properties(unofficial::libmariadb PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${MYSQL_INCLUDE_DIR}"
+            INTERFACE_LINK_LIBRARIES "${MYSQL_CLIENT_LIBS}"
+    )
+endif()
+
+find_path(BOOST_DI_INCLUDE_DIRS NAMES boost/di.hpp REQUIRED)
+find_path(PARALLEL_HASHMAP_INCLUDE_DIRS NAMES parallel_hashmap/phmap.h REQUIRED)
+find_path(ATOMIC_QUEUE_INCLUDE_DIRS NAMES atomic_queue/atomic_queue.h REQUIRED)
+find_path(BS_THREAD_POOL_INCLUDE_DIRS NAMES BS_thread_pool.hpp REQUIRED)
+
+set(CRYSTAL_ABSL_LIBS absl::any absl::base)
+foreach(ABSL_TARGET
+        absl::bits
+        absl::int128
+        absl::log
+        absl::stacktrace
+        absl::symbolize
+)
+    if(TARGET ${ABSL_TARGET})
+        list(APPEND CRYSTAL_ABSL_LIBS ${ABSL_TARGET})
+    endif()
+endforeach()
 
 # *****************************************************************************
 # Sanity Checks
@@ -67,9 +142,14 @@ option(TOGGLE_BIN_FOLDER "Use build/bin folder for generate compilation files" O
 option(OPTIONS_ENABLE_OPENMP "Enable Open Multi-Processing support." ON)
 option(DEBUG_LOG "Enable Debug Log" OFF)
 option(ASAN_ENABLED "Build this target with AddressSanitizer" OFF)
+option(VALGRIND_ENABLED "Build this target with Valgrind-friendly diagnostics" OFF)
 option(BUILD_STATIC_LIBRARY "Build using static libraries" OFF)
 option(SPEED_UP_BUILD_UNITY "Compile using build unity for speed up build" ON)
 option(USE_PRECOMPILED_HEADER "Compile using precompiled header" ON)
+
+if(ASAN_ENABLED AND VALGRIND_ENABLED)
+    message(FATAL_ERROR "ASAN_ENABLED and VALGRIND_ENABLED cannot be enabled together")
+endif()
 
 # === TOGGLE_BIN_FOLDER ===
 if(TOGGLE_BIN_FOLDER)
@@ -100,12 +180,23 @@ if(ASAN_ENABLED)
     log_option_enabled("asan")
     if(MSVC)
         add_compile_options(/fsanitize=address)
+        add_link_options(/fsanitize=address)
     else()
-        add_compile_options(-fsanitize=address)
-        link_libraries(-fsanitize=address)
+        add_compile_options(-fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls)
+        add_link_options(-fsanitize=address)
     endif()
 else()
     log_option_disabled("asan")
+endif()
+
+# === VALGRIND ===
+if(VALGRIND_ENABLED)
+    log_option_enabled("valgrind")
+    if(NOT MSVC)
+        add_compile_options(-fno-omit-frame-pointer)
+    endif()
+else()
+    log_option_disabled("valgrind")
 endif()
 
 # === BUILD_STATIC_LIBRARY ===
@@ -138,6 +229,11 @@ endif()
 
 # === IPO Configuration ===
 function(configure_linking target_name)
+    if(ASAN_ENABLED OR VALGRIND_ENABLED)
+        log_option_disabled("IPO/LTO disabled for diagnostic target ${target_name}.")
+        return()
+    endif()
+
     if(OPTIONS_ENABLE_IPO)
         # Check if IPO/LTO is supported
         include(CheckIPOSupported)

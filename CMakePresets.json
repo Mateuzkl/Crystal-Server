@@ -20,6 +20,28 @@
       }
     },
     {
+      "name": "native-linux",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "USE_VCPKG": "OFF",
+        "CMAKE_PREFIX_PATH": "$env{HOME}/.local",
+        "CMAKE_INCLUDE_PATH": "$env{HOME}/.local/include",
+        "CMAKE_LIBRARY_PATH": "$env{HOME}/.local/lib;$env{HOME}/.local/lib64",
+        "BUILD_STATIC_LIBRARY": "OFF",
+        "FEATURE_METRICS": "OFF",
+        "OPTIONS_ENABLE_CCACHE": "ON",
+        "OPTIONS_ENABLE_SCCACHE": "OFF",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
       "name": "windows-release",
       "inherits": "base",
       "displayName": "Windows - Release",
@@ -101,6 +123,39 @@
       }
     },
     {
+      "name": "asan-linux",
+      "inherits": "native-linux",
+      "displayName": "Linux - ASan",
+      "description": "Configure AddressSanitizer with native Ubuntu/WSL packages",
+      "binaryDir": "${sourceDir}/build-asan-linux",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "DEBUG_LOG": "ON",
+        "ASAN_ENABLED": "ON",
+        "VALGRIND_ENABLED": "OFF",
+        "OPTIONS_ENABLE_IPO": "OFF",
+        "SPEED_UP_BUILD_UNITY": "OFF",
+        "USE_PRECOMPILED_HEADER": "ON",
+        "RUN_TESTS_AFTER_BUILD": "OFF"
+      }
+    },
+    {
+      "name": "valgrind-linux",
+      "inherits": "native-linux",
+      "displayName": "Linux - Valgrind",
+      "description": "Configure a Valgrind-friendly native Ubuntu/WSL build",
+      "binaryDir": "${sourceDir}/build-valgrind-linux",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "ASAN_ENABLED": "OFF",
+        "VALGRIND_ENABLED": "ON",
+        "OPTIONS_ENABLE_IPO": "OFF",
+        "SPEED_UP_BUILD_UNITY": "OFF",
+        "USE_PRECOMPILED_HEADER": "ON",
+        "RUN_TESTS_AFTER_BUILD": "OFF"
+      }
+    },
+    {
       "name": "linux-test",
       "inherits": "linux-release",
       "displayName": "Linux - Test Build",
@@ -118,6 +173,18 @@
     {
       "name": "linux-debug",
       "configurePreset": "linux-debug"
+    },
+    {
+      "name": "linux-debug-asan",
+      "configurePreset": "linux-debug-asan"
+    },
+    {
+      "name": "asan-linux",
+      "configurePreset": "asan-linux"
+    },
+    {
+      "name": "valgrind-linux",
+      "configurePreset": "valgrind-linux"
     },
     {
       "name": "linux-test",

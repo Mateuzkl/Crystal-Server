@@ -1,99 +1,149 @@
-# Crystal Server
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:051923,45:0f766e,100:22c55e&height=220&section=header&text=Crystal%20Server&fontSize=56&fontColor=ffffff&fontAlignY=38&desc=Open-source%20MMORPG%20server%20emulator&descAlignY=60&descSize=17&animation=fadeIn" alt="Crystal Server" />
+</p>
 
-[![Discord](https://img.shields.io/discord/1310943869923495988?style=flat-square&logo=discord)](https://discord.gg/7AYJEHTghQ)
-[![Build - Ubuntu](https://github.com/zimbadev/crystalserver/actions/workflows/build-ubuntu.yml/badge.svg)](https://github.com/zimbadev/crystalserver/actions/workflows/build-ubuntu.yml)
-[![Build - Windows - CMake](https://github.com/zimbadev/crystalserver/actions/workflows/build-windows-cmake.yml/badge.svg)](https://github.com/zimbadev/crystalserver/actions/workflows/build-windows-cmake.yml)
-[![Build - Windows - Solution](https://github.com/zimbadev/crystalserver/actions/workflows/build-windows-solution.yml/badge.svg)](https://github.com/zimbadev/crystalserver/actions/workflows/build-windows-solution.yml)
-[![Build - Docker](https://github.com/zimbadev/crystalserver/actions/workflows/build-docker.yml/badge.svg)](https://github.com/zimbadev/crystalserver/actions/workflows/build-docker.yml)
-![GitHub repo size](https://img.shields.io/github/repo-size/zimbadev/crystalserver)
-[![GitHub](https://img.shields.io/github/license/zimbadev/crystalserver)](https://github.com/zimbadev/crystalserver/blob/main/LICENSE)
+<div align="center">
 
+[![Ubuntu Build](https://github.com/Mateuzkl/Crystal-Server/actions/workflows/build-ubuntu.yml/badge.svg)](https://github.com/Mateuzkl/Crystal-Server/actions/workflows/build-ubuntu.yml)
+[![License](https://img.shields.io/github/license/Mateuzkl/Crystal-Server?style=flat-square)](LICENSE)
+[![Discord](https://img.shields.io/discord/1310943869923495988?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/zm4MTKtQQh)
 
-## Project
+<br />
 
-Crystal Server is a free and open-source MMORPG server emulator written in C++.
+![Engine](https://img.shields.io/badge/ENGINE-Crystal%20Server-0f766e?style=for-the-badge)
+![Protocol](https://img.shields.io/badge/PROTOCOL-15.25-22c55e?style=for-the-badge)
+![C++](https://img.shields.io/badge/C++-23-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)
+![LuaJIT](https://img.shields.io/badge/LuaJIT-5.1-2C2D72?style=for-the-badge&logo=lua&logoColor=white)
+![MariaDB](https://img.shields.io/badge/MariaDB-003545?style=for-the-badge&logo=mariadb&logoColor=white)
+![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)
 
-It is based on [The Forgotten Server](https://github.com/otland/forgottenserver) project forked from [Open Tibia](https://github.com/opentibia/server).
+<br />
+<br />
 
-This project was created a long time ago to distribute a stable and safe distro for those who want to have a Tibia otserv.
+**Crystal Server** is a free and open-source MMORPG server emulator written in C++.
 
-To connect to the server and to take a stable experience, you can
-use the [Game Client](https://github.com/zimbadev/gameclient/releases) or [mehah's OTCLient](https://github.com/mehah/otclient).
+It is based on [The Forgotten Server](https://github.com/otland/forgottenserver), forked from [Open Tibia](https://github.com/opentibia/server), and focused on a stable OTServ experience.
 
-If you want edit the map, use the [Remere's Map Editor](https://github.com/zimbadev/rme-crystalserver/releases).
+[Discord](https://discord.gg/zm4MTKtQQh) | [Issues](https://github.com/Mateuzkl/Crystal-Server/issues) | [Game Client](https://github.com/zimbadev/gameclient/releases) | [Map Editor](https://github.com/zimbadev/rme-crystalserver/releases)
 
-You are subject to our code of conduct, read
-at [this link](https://github.com/zimbadev/crystalserver/blob/main/CODE_OF_CONDUCT.md).
+</div>
 
-You can use your own tool to generate Monster Loot and Monster Elements at [this link](https://crystalsever.vercel.app).
+---
 
-### Official Discord
-Enjoy our [Discord](https://discord.gg/zm4MTKtQQh)
+## Highlights
 
-### Thanks
-- [Open Tibia](https://github.com/opentibia/server) and their [contributors](https://github.com/opentibia/server/graphs/contributors).
-- [The Forgotten Server](https://github.com/otland/forgottenserver) and their [contributors](https://github.com/otland/forgottenserver/graphs/contributors).
-- [Crystal Server](https://github.com/zimbadev/crystalserver) and their [contributors](https://github.com/zimbadev/crystalserver/graphs/contributors).
+| Area | Details |
+|---|---|
+| Core | C++23, CMake, LuaJIT, MySQL/MariaDB and modern Crystal systems |
+| Protocol | Client protocol 15.25, with old protocol support controlled by config |
+| Build | Native Ubuntu/WSL build through one simple `build.sh` command |
+| Diagnostics | Easy AddressSanitizer and Valgrind builds for memory fixes |
+| Tools | Compatible with the Crystal game client, Mehah OTClient and RME Crystal |
 
-### Issues
+---
 
-We use the [issue tracker on GitHub](https://github.com/zimbadev/crystalserver/issues). Keep in mind that everyone who is
-watching the repository gets notified by e-mail when there is an activity, so be thoughtful and avoid writing comments
-that aren't meant for an issue (e.g. "+1"). If you'd like for an issue to be fixed faster, you should either fix it
-yourself and submit a pull request, or place a bounty on the issue.
+## Quick Start
 
-### Pull requests
+For Ubuntu 24.04 or WSL:
 
-Before [creating a pull request](https://github.com/zimbadev/crystalserver/pulls) please keep in mind:
+```bash
+git clone https://github.com/Mateuzkl/Crystal-Server.git
+cd Crystal-Server
 
-* Do not send Pull Request changing the map, as we can't review the changes.
-* Focus on fixing only one thing, mixing too much things on the same Pull Request make it harder to review, harder to
-  test and if we need to revert the change it will remove other things together.
-* Follow the project indentation, if your editor support you can use the [editorconfig](https://editorconfig.org/) to
-  automatic configure the indentation.
-* There are people that doesn't play the game on the official server, so explain your changes to help understand what
-  are you changing and why.
-* Avoid opening a Pull Request to just update one line of a XML file.
+chmod +x build.sh run-asan.sh run-valgrind.sh
+./build.sh
+./crystalserver
+```
 
+The script installs the required packages, prepares header-only dependencies in `$HOME/.local`, configures CMake without vcpkg and copies the final binary to `./crystalserver`.
 
-### Download Latest Executable
-* Follow the steps in the video below to download the latest executable available, compiled by GitHub Actions.
+---
 
-https://github.com/user-attachments/assets/58089db8-c86b-43ed-9601-556af2405a80
+## Build Commands
 
-### Compiling from Source (Guided Scripts)
-If you prefer to compile the server yourself, you can use one of our guided installer scripts. You only need to download the file that matches your operating system (`crystal_windows_installer.ps1` for Windows, or `linux_installer.sh` for Linux).
+| Goal | Command |
+|---|---|
+| Normal build | `./build.sh` |
+| Clean normal build | `./build.sh --clean` |
+| Release build | `./build.sh --release` |
+| Debug build | `./build.sh --debug` |
+| Use custom jobs | `./build.sh --jobs 4` |
+| Skip dependency install | `./build.sh --skip-deps` |
+| Try outside Ubuntu 24.04 | `./build.sh --force-os` |
 
-#### Windows (PowerShell)
-A guided PowerShell script is available to automate the entire compilation process, including the installation of Git, CMake, and Visual Studio.
+---
 
-1.  Download the `crystal_windows_installer.ps1` script to your computer.
-2.  Right-click your Start menu and select **"Windows Terminal (Admin)"** or **"PowerShell (Admin)"**.
-3.  Due to Windows security, you must first bypass the execution policy *for this session*. Type the following command and press Enter:
-    ```powershell
-    Set-ExecutionPolicy Bypass -Scope Process
-    ```
-4.  Navigate to the script's location (e.g., your Desktop):
-    ```powershell
-    cd C:\Users\YourUser\Desktop
-    ```
-5.  Run the installer:
-    ```powershell
-    .\crystal_windows_installer.ps1
-    ```
-6.  The script will automatically set the correct policy for future runs and guide you through the language, branch, and installation steps.
+## ASan
 
-#### Linux (Bash)
-A guided Bash script is available for most modern distributions (Debian/Ubuntu, Arch, Fedora).
+Use AddressSanitizer when you are hunting crashes, use-after-free bugs, invalid memory access or leaks:
 
-1.  Download the `linux_installer.sh` script.
-2.  Open your terminal and navigate to the script's location.
-3.  Make the script executable:
-    ```bash
-    chmod +x linux_installer.sh
-    ```
-4.  Run the installer (do **not** use `sudo` to run the script itself):
-    ```bash
-    ./linux_installer.sh
-    ```
-5.  The script will guide you through the process and will only ask for your password (via `sudo`) when it needs to install system packages.
+```bash
+./build.sh --asan
+./run-asan.sh
+```
+
+The ASan build uses `build-asan-linux` and runs with strict defaults:
+
+```bash
+ASAN_OPTIONS=detect_leaks=1:halt_on_error=1:abort_on_error=1:symbolize=1
+```
+
+---
+
+## Valgrind
+
+Use Valgrind when you need a slower but very detailed memory report:
+
+```bash
+./build.sh --valgrind
+./run-valgrind.sh
+```
+
+The Valgrind build uses `build-valgrind-linux` and writes the report to:
+
+```bash
+valgrind.log
+```
+
+To use a custom binary or log path:
+
+```bash
+CRYSTAL_VALGRIND_BIN=./build-valgrind-linux/bin/crystalserver \
+CRYSTAL_VALGRIND_LOG=./valgrind.log \
+./run-valgrind.sh
+```
+
+---
+
+## Clients And Tools
+
+| Tool | Link |
+|---|---|
+| Crystal game client | [Download](https://github.com/zimbadev/gameclient/releases) |
+| Mehah OTClient | [Repository](https://github.com/mehah/otclient) |
+| Remere's Map Editor for Crystal | [Download](https://github.com/zimbadev/rme-crystalserver/releases) |
+| Monster Loot and Elements tool | [Open](https://crystalsever.vercel.app/) |
+
+---
+
+## Contributing
+
+Bug reports and pull requests are welcome.
+
+Keep pull requests focused, avoid map-only changes, follow the project indentation and explain what changed and why.
+
+Use the [GitHub issue tracker](https://github.com/Mateuzkl/Crystal-Server/issues) for bugs, build problems and reproducible crashes. Logs from ASan or Valgrind are especially helpful.
+
+---
+
+## Credits
+
+Crystal Server exists thanks to:
+
+- [Open Tibia](https://github.com/opentibia/server) and its contributors.
+- [The Forgotten Server](https://github.com/otland/forgottenserver) and its contributors.
+- [Crystal Server](https://github.com/zimbadev/crystalserver) and its contributors.
+
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:22c55e,55:0f766e,100:051923&height=120&section=footer&text=Crystal%20Server&fontSize=18&fontColor=ffffff&fontAlignY=68" alt="Crystal Server footer" />
+</p>

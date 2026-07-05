@@ -112,6 +112,7 @@ public:
 	void scheduleSendAll();
 
 	static OutputMessage_ptr getOutputMessage();
+	static void drainPool();
 
 	void addProtocolToAutosend(const Protocol_ptr &protocol);
 	void removeProtocolFromAutosend(const Protocol_ptr &protocol);

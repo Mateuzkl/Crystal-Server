@@ -61,8 +61,10 @@ target_include_directories(${PROJECT_NAME}_lib
         ${CMAKE_SOURCE_DIR}/src
         ${GMP_INCLUDE_DIRS}
         ${LUAJIT_INCLUDE_DIRS}
+        ${MAGIC_ENUM_INCLUDE_DIRS}
         ${PARALLEL_HASHMAP_INCLUDE_DIRS}
         ${ATOMIC_QUEUE_INCLUDE_DIRS}
+        ${BS_THREAD_POOL_INCLUDE_DIRS}
 )
 
 # *****************************************************************************
@@ -74,7 +76,7 @@ target_link_libraries(${PROJECT_NAME}_lib
         ${LUAJIT_LIBRARIES}
         CURL::libcurl
         ZLIB::ZLIB
-        absl::any absl::log absl::base absl::bits
+        ${CRYSTAL_ABSL_LIBS}
         asio::asio
         eventpp::eventpp
         fmt::fmt
@@ -105,12 +107,6 @@ if(FEATURE_METRICS)
     )
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-    target_link_libraries(${PROJECT_NAME}_lib PUBLIC ${ZLIB_LIBRARY_DEBUG})
-else()
-    target_link_libraries(${PROJECT_NAME}_lib PUBLIC ${ZLIB_LIBRARY_RELEASE})
-endif()
-
 if (MSVC)
     if(BUILD_STATIC_LIBRARY)
         set(VCPKG_TARGET_TRIPLET "x64-windows-static" CACHE STRING "")
@@ -134,7 +130,7 @@ else()
 endif()
 
 # === Optimization Flags ===
-if(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo" OR CMAKE_BUILD_TYPE STREQUAL "Release")
+if((CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo" OR CMAKE_BUILD_TYPE STREQUAL "Release") AND NOT ASAN_ENABLED AND NOT VALGRIND_ENABLED)
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         target_compile_options(${PROJECT_NAME}_lib PRIVATE -O3 -march=native)
     elseif(MSVC)

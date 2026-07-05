@@ -5,17 +5,21 @@ cmake_minimum_required(VERSION 3.22 FATAL_ERROR)
 # Needed libs are in file vcpkg.json
 # Windows required libs: .\vcpkg install --triplet x64-windows asio pugixml spdlog curl protobuf parallel-hashmap magic-enum mio luajit libmariadb mpir abseil bshoshany-thread-pool
 
-if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+option(USE_VCPKG "Enable vcpkg toolchain auto-detection" ON)
+
+if(USE_VCPKG AND DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
             CACHE STRING "")
 endif()
 
-if(DEFINED ENV{VCPKG_DEFAULT_TRIPLET} AND NOT DEFINED VCPKG_TARGET_TRIPLET)
+if(USE_VCPKG AND DEFINED ENV{VCPKG_DEFAULT_TRIPLET} AND NOT DEFINED VCPKG_TARGET_TRIPLET)
     set(VCPKG_TARGET_TRIPLET "$ENV{VCPKG_DEFAULT_TRIPLET}" CACHE STRING "")
 endif()
 
-set(VCPKG_FEATURE_FLAGS "versions")
-set(VCPKG_BUILD_TYPE "release")
+if(USE_VCPKG)
+    set(VCPKG_FEATURE_FLAGS "versions")
+    set(VCPKG_BUILD_TYPE "release")
+endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # *****************************************************************************

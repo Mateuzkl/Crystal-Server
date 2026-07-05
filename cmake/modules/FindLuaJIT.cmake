@@ -15,7 +15,7 @@ ELSE()
 ENDIF()
 
 FIND_PATH(LUAJIT_INCLUDE_DIR
-	NAMES lua.h lualib.h
+	NAMES luajit.h
 	HINTS
 		ENV LuajitPath${_LIB_SUFFIX}
 		ENV LuajitPath
@@ -27,39 +27,75 @@ FIND_PATH(LUAJIT_INCLUDE_DIR
 		${DepsPath}
 		${_LUAJIT_INCLUDE_DIRS}
 	PATHS
-		/usr/include
 		/usr/local/include
+		/usr/include
 		/opt/local/include
 		/opt/local
 		/sw/include
 		~/Library/Frameworks
 		/Library/Frameworks
 	PATH_SUFFIXES
-		include
-		luajit
-		luajit/src
-		include/luajit
-		include/luajit/src
-		luajit-2.0
-		include/luajit-2.0
-		luajit2.0
-		include/luajit2.0
 		luajit-2.1
 		include/luajit-2.1
 		luajit2.1
 		include/luajit2.1
+		luajit-2.0
+		include/luajit-2.0
+		luajit2.0
+		include/luajit2.0
+		luajit
+		luajit/src
+		include/luajit
+		include/luajit/src
 		)
+
+if(NOT LUAJIT_INCLUDE_DIR)
+	FIND_PATH(LUAJIT_INCLUDE_DIR
+		NAMES lua.h lualib.h
+		HINTS
+			ENV LuajitPath${_LIB_SUFFIX}
+			ENV LuajitPath
+			ENV DepsPath${_LIB_SUFFIX}
+			ENV DepsPath
+			${LuajitPath${_LIB_SUFFIX}}
+			${LuajitPath}
+			${DepsPath${_LIB_SUFFIX}}
+			${DepsPath}
+			${_LUAJIT_INCLUDE_DIRS}
+		PATHS
+			/usr/local/include
+			/usr/include
+			/opt/local/include
+			/opt/local
+			/sw/include
+			~/Library/Frameworks
+			/Library/Frameworks
+		PATH_SUFFIXES
+			luajit-2.1
+			include/luajit-2.1
+			luajit2.1
+			include/luajit2.1
+			luajit-2.0
+			include/luajit-2.0
+			luajit2.0
+			include/luajit2.0
+			luajit
+			luajit/src
+			include/luajit
+			include/luajit/src
+			)
+endif()
 
 find_library(LUAJIT_LIB
 	NAMES ${_LUAJIT_LIBRARIES} luajit luajit-51 luajit-5.1 lua51
 	HINTS
-		ENV LuajitPath${_lib_suffix}
+		ENV LuajitPath${_LIB_SUFFIX}
 		ENV LuajitPath
-		ENV DepsPath${_lib_suffix}
+		ENV DepsPath${_LIB_SUFFIX}
 		ENV DepsPath
-		${LuajitPath${_lib_suffix}}
+		${LuajitPath${_LIB_SUFFIX}}
 		${LuajitPath}
-		${DepsPath${_lib_suffix}}
+		${DepsPath${_LIB_SUFFIX}}
 		${DepsPath}
 		${_LUAJIT_LIBRARY_DIRS}
 	PATHS
@@ -71,12 +107,12 @@ find_library(LUAJIT_LIB
 		~/Library/Frameworks
 		/Library/Frameworks
 	PATH_SUFFIXES
-		lib${_lib_suffix} lib
-		libs${_lib_suffix} libs
-		bin${_lib_suffix} bin
-		../lib${_lib_suffix} ../lib
-		../libs${_lib_suffix} ../libs
-		../bin${_lib_suffix} ../bin)
+		lib${_LIB_SUFFIX} lib
+		libs${_LIB_SUFFIX} libs
+		bin${_LIB_SUFFIX} bin
+		../lib${_LIB_SUFFIX} ../lib
+		../libs${_LIB_SUFFIX} ../libs
+		../bin${_LIB_SUFFIX} ../bin)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LuaJIT DEFAULT_MSG LUAJIT_LIB LUAJIT_INCLUDE_DIR)
